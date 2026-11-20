@@ -48,8 +48,15 @@ Public Class MainForm
 				Me.Height = Me.MinimumSize.Height
 			End If
 
-			If TheApp.CommandLineOption_Settings_IsEnabled Then
-				TheApp.Settings.MainWindowSelectedTabIndex = Me.MainTabControl.TabPages.IndexOf(Me.UpdateTabPage)
+			'NOTE: This is a personal build, not an official release, so hide the Update tab.
+			'      It would check for and install official releases over this build.
+			Me.MainTabControl.TabPages.Remove(Me.UpdateTabPage)
+
+			'If TheApp.CommandLineOption_Settings_IsEnabled Then
+			'	TheApp.Settings.MainWindowSelectedTabIndex = Me.MainTabControl.TabPages.IndexOf(Me.UpdateTabPage)
+			'End If
+			If TheApp.Settings.MainWindowSelectedTabIndex >= Me.MainTabControl.TabCount Then
+				TheApp.Settings.MainWindowSelectedTabIndex = 0
 			End If
 			Me.MainTabControl.SelectedIndex = TheApp.Settings.MainWindowSelectedTabIndex
 
@@ -111,7 +118,8 @@ Public Class MainForm
 		AddHandler Me.PublishUserControl1.UseInDownloadToolStripMenuItem.Click, AddressOf Me.PublishUserControl1_UseInDownloadToolStripMenuItem_Click
 		AddHandler Me.UpdateUserControl1.UpdateAvailable, AddressOf Me.UpdateUserControl1_UpdateAvailable
 
-		Me.UpdateUserControl1.CheckForUpdate()
+		'NOTE: Update tab is hidden in this build; see Init().
+		'Me.UpdateUserControl1.CheckForUpdate()
 	End Sub
 
 	Private Sub Free()
