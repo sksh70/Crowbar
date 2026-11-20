@@ -30,7 +30,7 @@ Public Class UpdateUserControl
 		AddHandler Me.DownloadFolderTextBox.DataBindings("Text").Parse, AddressOf FileManager.ParsePathFileName
 		AddHandler Me.UpdateFolderTextBox.DataBindings("Text").Parse, AddressOf FileManager.ParsePathFileName
 
-		Me.CurrentVersionLabel.Text = "Current Version: " + My.Application.Info.Version.ToString(2)
+		Me.CurrentVersionLabel.Text = "Current Version: " + App.VersionText
 	End Sub
 
 	' Do not need Free() because this widget is destroyed only on program exit.

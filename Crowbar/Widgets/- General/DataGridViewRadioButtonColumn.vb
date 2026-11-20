@@ -49,7 +49,9 @@ Public Class DataGridViewRadioButtonColumn
 		p.X = CInt(cellBounds.X + (cellBounds.Width - radioButtonSize) / 2)
 		p.Y = CInt(cellBounds.Y + (cellBounds.Height - radioButtonSize) / 2)
 
-		If state Then
+		If ThemeManager.IsDark Then
+			ThemeManager.DrawRadioGlyph(g, New Rectangle(p, New Size(radioButtonSize, radioButtonSize)), state, True)
+		ElseIf state Then
 			RadioButtonRenderer.DrawRadioButton(g, p, VisualStyles.RadioButtonState.CheckedNormal)
 		Else
 			RadioButtonRenderer.DrawRadioButton(g, p, VisualStyles.RadioButtonState.UncheckedNormal)

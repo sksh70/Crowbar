@@ -1,5 +1,10 @@
 ﻿Public Class DeleteItemForm
 
+	Protected Overrides Sub OnLoad(e As EventArgs)
+		ThemeManager.ApplyToForm(Me)
+		MyBase.OnLoad(e)
+	End Sub
+
 	Private Sub DeleteButton_Click(sender As Object, e As EventArgs) Handles DeleteButton.Click
 		Me.DialogResult = DialogResult.OK
 		Me.Close()

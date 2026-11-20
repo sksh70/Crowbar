@@ -2,6 +2,12 @@ Imports System.ComponentModel
 
 Public Module AppEnums
 
+	Public Enum AppThemeOptions
+		<Description("System")> System
+		<Description("Light")> Light
+		<Description("Dark")> Dark
+	End Enum
+
 	Public Enum InputOptions
 		<Description("File")> File
 		<Description("Folder")> Folder

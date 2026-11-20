@@ -11,6 +11,7 @@ Public Class AppSettings
 		'MyBase.New()
 
 		Me.theAppIsSingleInstance = False
+		Me.theAppTheme = AppThemeOptions.System
 		Me.theWindowLocation = New Point(0, 0)
 		Me.theWindowSize = New Size(800, 600)
 		Me.theWindowState = FormWindowState.Normal
@@ -130,6 +131,16 @@ Public Class AppSettings
 		Set(ByVal value As Boolean)
 			theAppIsSingleInstance = value
 			NotifyPropertyChanged("AppIsSingleInstance")
+		End Set
+	End Property
+
+	Public Property AppTheme() As AppThemeOptions
+		Get
+			Return theAppTheme
+		End Get
+		Set(ByVal value As AppThemeOptions)
+			theAppTheme = value
+			NotifyPropertyChanged("AppTheme")
 		End Set
 	End Property
 
@@ -1686,7 +1697,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultUnpackOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.UnpackOutputSubfolderName = "unpacked " + My.Application.Info.Version.ToString(2)
+		Me.UnpackOutputSubfolderName = "unpacked " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultUnpackOptions()
@@ -1698,7 +1709,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultDecompileOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.DecompileOutputSubfolderName = "decompiled " + My.Application.Info.Version.ToString(2)
+		Me.DecompileOutputSubfolderName = "decompiled " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultDecompileReCreateFilesOptions()
@@ -1726,7 +1737,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultCompileOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.CompileOutputSubfolderName = "compiled " + My.Application.Info.Version.ToString(2)
+		Me.CompileOutputSubfolderName = "compiled " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultCompileOptions()
@@ -1830,6 +1841,7 @@ Public Class AppSettings
 
 	' General
 	Private theAppIsSingleInstance As Boolean
+	Private theAppTheme As AppThemeOptions
 	Private theWindowLocation As Point
 	Private theWindowSize As Size
 	Private theWindowState As FormWindowState

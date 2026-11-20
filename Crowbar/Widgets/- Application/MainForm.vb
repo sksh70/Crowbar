@@ -48,8 +48,16 @@ Public Class MainForm
 				Me.Height = Me.MinimumSize.Height
 			End If
 
-			If TheApp.CommandLineOption_Settings_IsEnabled Then
-				TheApp.Settings.MainWindowSelectedTabIndex = Me.MainTabControl.TabPages.IndexOf(Me.UpdateTabPage)
+			'NOTE: This is a personal build, not an official release, so hide the Update tab.
+			'      It would check for and install official releases over this build.
+			Me.MainTabControl.TabPages.Remove(Me.UpdateTabPage)
+			Me.UpdateTabPage.Dispose()
+
+			'If TheApp.CommandLineOption_Settings_IsEnabled Then
+			'	TheApp.Settings.MainWindowSelectedTabIndex = Me.MainTabControl.TabPages.IndexOf(Me.UpdateTabPage)
+			'End If
+			If TheApp.Settings.MainWindowSelectedTabIndex >= Me.MainTabControl.TabCount Then
+				TheApp.Settings.MainWindowSelectedTabIndex = 0
 			End If
 			Me.MainTabControl.SelectedIndex = TheApp.Settings.MainWindowSelectedTabIndex
 
@@ -109,9 +117,10 @@ Public Class MainForm
 		AddHandler Me.PackUserControl1.SetUpGamesButton.Click, AddressOf Me.PackSetUpGamesButton_Click
 		AddHandler Me.PackUserControl1.UseAllInPublishButton.Click, AddressOf Me.PackUserControl1_UseAllInPublishButton_Click
 		AddHandler Me.PublishUserControl1.UseInDownloadToolStripMenuItem.Click, AddressOf Me.PublishUserControl1_UseInDownloadToolStripMenuItem_Click
-		AddHandler Me.UpdateUserControl1.UpdateAvailable, AddressOf Me.UpdateUserControl1_UpdateAvailable
+		'NOTE: Update tab is hidden in this build; see Init().
+		'AddHandler Me.UpdateUserControl1.UpdateAvailable, AddressOf Me.UpdateUserControl1_UpdateAvailable
 
-		Me.UpdateUserControl1.CheckForUpdate()
+		'Me.UpdateUserControl1.CheckForUpdate()
 	End Sub
 
 	Private Sub Free()
@@ -134,7 +143,7 @@ Public Class MainForm
 		RemoveHandler Me.PackUserControl1.SetUpGamesButton.Click, AddressOf Me.PackSetUpGamesButton_Click
 		RemoveHandler Me.PackUserControl1.UseAllInPublishButton.Click, AddressOf Me.PackUserControl1_UseAllInPublishButton_Click
 		RemoveHandler Me.PublishUserControl1.UseInDownloadToolStripMenuItem.Click, AddressOf Me.PublishUserControl1_UseInDownloadToolStripMenuItem_Click
-		RemoveHandler Me.UpdateUserControl1.UpdateAvailable, AddressOf Me.UpdateUserControl1_UpdateAvailable
+		'RemoveHandler Me.UpdateUserControl1.UpdateAvailable, AddressOf Me.UpdateUserControl1_UpdateAvailable
 
 		If Me.WindowState = FormWindowState.Normal Then
 			TheApp.Settings.WindowLocation = Me.Location
@@ -311,13 +320,13 @@ Public Class MainForm
 		Me.MainTabControl.SelectTab(Me.DownloadTabPage)
 	End Sub
 
-	Private Sub UpdateUserControl1_UpdateAvailable(ByVal sender As System.Object, ByVal e As UpdateUserControl.UpdateAvailableEventArgs)
-		If e.UpdateIsAvailable Then
-			Me.UpdateTabPage.Text = "Update Available"
-		Else
-			Me.UpdateTabPage.Text = "Update"
-		End If
-	End Sub
+	'Private Sub UpdateUserControl1_UpdateAvailable(ByVal sender As System.Object, ByVal e As UpdateUserControl.UpdateAvailableEventArgs)
+	'	If e.UpdateIsAvailable Then
+	'		Me.UpdateTabPage.Text = "Update Available"
+	'	Else
+	'		Me.UpdateTabPage.Text = "Update"
+	'	End If
+	'End Sub
 
 #End Region
 

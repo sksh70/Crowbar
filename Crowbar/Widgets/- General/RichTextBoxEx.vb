@@ -72,8 +72,11 @@ Public Class RichTextBoxEx
 			'Dim drawFont As System.Drawing.Font = New System.Drawing.Font(Me.theOriginalFont.FontFamily, Me.theOriginalFont.Size, Me.theOriginalFont.Style, Me.theOriginalFont.Unit)
 			Dim drawFont As System.Drawing.Font = New System.Drawing.Font(Me.theOriginalFont.FontFamily, Me.theOriginalFont.Size, FontStyle.Italic, Me.theOriginalFont.Unit)
 
-			Dim drawForeColor As Color = SystemColors.GrayText
+			Dim drawForeColor As Color = ThemeManager.GrayText
 			Dim drawBackColor As Color = SystemColors.Control
+			If ThemeManager.IsDark Then
+				drawBackColor = Me.BackColor
+			End If
 			If drawForeColor = drawBackColor Then
 				drawForeColor = Me.ForeColor
 				drawBackColor = Me.BackColor

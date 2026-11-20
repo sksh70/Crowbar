@@ -138,7 +138,7 @@ Public Class TreeViewEx
 						node.Tag = GetTag(item, leafItem, CType(node.Tag, TagType), False, False)
 					End If
 					If IsDimmed(item) Then
-						childNode.ForeColor = SystemColors.GrayText
+						childNode.ForeColor = ThemeManager.GrayText
 					Else
 						'FROM: https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.treenode.forecolor?view=netframework-4.0
 						' If null, the Color used is the ForeColor property value of the TreeView control that the tree node is assigned to.
@@ -183,8 +183,14 @@ Public Class TreeViewEx
 				'TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, e.Bounds, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.GlyphOverhangPadding)
 				'e.DrawDefault = False
 			Else
-				e.Graphics.FillRectangle(SystemBrushes.ControlDark, e.Bounds)
-				TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, e.Bounds, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.GlyphOverhangPadding)
+				Using selectionBrush As New SolidBrush(ThemeManager.Map(SystemColors.ControlDark))
+					e.Graphics.FillRectangle(selectionBrush, e.Bounds)
+				End Using
+				Dim nodeForeColor As Color = e.Node.ForeColor
+				If ThemeManager.IsDark AndAlso nodeForeColor.IsEmpty Then
+					nodeForeColor = Me.ForeColor
+				End If
+				TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, e.Bounds, nodeForeColor, e.Node.BackColor, TextFormatFlags.GlyphOverhangPadding)
 				e.DrawDefault = False
 			End If
 		End If

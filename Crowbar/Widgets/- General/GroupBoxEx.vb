@@ -62,9 +62,9 @@ Public Class GroupBoxEx
 				Me.theControlIsReadOnly = value
 
 				If Me.theControlIsReadOnly Then
-					Me.ForeColor = SystemColors.GrayText
+					ThemeManager.SetColor(Me, SystemColors.GrayText, Sub(c) Me.ForeColor = c)
 				Else
-					Me.ForeColor = SystemColors.ControlText
+					ThemeManager.SetColor(Me, SystemColors.ControlText, Sub(c) Me.ForeColor = c)
 				End If
 			End If
 		End Set
