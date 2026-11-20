@@ -351,6 +351,8 @@ Public NotInheritable Class ThemeManager
 			AddHandler aControl.Paint, AddressOf ThemeManager.GroupBox_Paint
 		ElseIf ThemeManager.IsGlyphButton(aControl) Then
 			AddHandler aControl.Paint, AddressOf ThemeManager.GlyphButton_Paint
+		ElseIf TypeOf aControl Is ButtonBase Then
+			AddHandler aControl.Paint, AddressOf ThemeManager.Button_Paint
 		ElseIf TypeOf aControl Is DataGridView Then
 			AddHandler CType(aControl, DataGridView).ColumnAdded, AddressOf ThemeManager.DataGridView_ColumnAdded
 		End If
@@ -425,6 +427,7 @@ Public NotInheritable Class ThemeManager
 		Dim originalMouseOverBackColor As Color = aButton.FlatAppearance.MouseOverBackColor
 		Dim originalMouseDownBackColor As Color = aButton.FlatAppearance.MouseDownBackColor
 		Dim originalCheckedBackColor As Color = aButton.FlatAppearance.CheckedBackColor
+		Dim originalBorderSize As Integer = aButton.FlatAppearance.BorderSize
 		' Added first so it runs last: restoring BackColor turns off UseVisualStyleBackColor.
 		state.RestoreActions.Add(Sub()
 									 aButton.FlatStyle = originalFlatStyle
@@ -432,10 +435,14 @@ Public NotInheritable Class ThemeManager
 									 aButton.FlatAppearance.MouseOverBackColor = originalMouseOverBackColor
 									 aButton.FlatAppearance.MouseDownBackColor = originalMouseDownBackColor
 									 aButton.FlatAppearance.CheckedBackColor = originalCheckedBackColor
+									 aButton.FlatAppearance.BorderSize = originalBorderSize
 									 aButton.UseVisualStyleBackColor = originalUseVisualStyleBackColor
 								 End Sub)
 
 		aButton.FlatStyle = FlatStyle.Flat
+		' Button_Paint draws the border instead. With a flat border, WinForms (in apps targeting .NET 4.0, like Crowbar)
+		'     leaves less room for the text, so text in narrow buttons is cut, e.g. "View" shows as "Vie".
+		aButton.FlatAppearance.BorderSize = 0
 		aButton.FlatAppearance.BorderColor = theDarkButtonBorder
 		aButton.FlatAppearance.MouseOverBackColor = theDarkButtonHotBack
 		aButton.FlatAppearance.MouseDownBackColor = theDarkButtonPressedBack
@@ -737,6 +744,19 @@ Public NotInheritable Class ThemeManager
 			Dim textColor As Color = If(aGroupBox.Enabled, aGroupBox.ForeColor, theDarkGrayText)
 			TextRenderer.DrawText(g, aGroupBox.Text, aGroupBox.Font, textRect, textColor, aGroupBox.BackColor, TextFormatFlags.SingleLine)
 		End If
+	End Sub
+
+	' Draws the border of a dark button; see DarkenButton.
+	Private Shared Sub Button_Paint(ByVal sender As Object, ByVal e As PaintEventArgs)
+		Dim state As ThemedState = Nothing
+		If Not theIsDark OrElse Not theThemedStates.TryGetValue(sender, state) Then
+			Exit Sub
+		End If
+
+		Dim aButton As ButtonBase = CType(sender, ButtonBase)
+		Using borderPen As New Pen(If(aButton.Enabled, theDarkButtonBorder, theDarkBorder))
+			e.Graphics.DrawRectangle(borderPen, 0, 0, aButton.Width - 1, aButton.Height - 1)
+		End Using
 	End Sub
 
 	' Draws the check box or radio button glyph in theme colors over the light one drawn by Windows.
