@@ -912,8 +912,11 @@ Public NotInheritable Class ThemeManager
 			End If
 			Try
 				Using g As Graphics = Graphics.FromHdc(windowDC)
-					Dim width As Integer = Me.theControl.Width
-					Dim height As Integer = Me.theControl.Height
+					' During a resize, Windows paints the border before WinForms updates the widget's size, so use the window's.
+					Dim windowRect As RECT
+					GetWindowRect(Me.Handle, windowRect)
+					Dim width As Integer = windowRect.Right - windowRect.Left
+					Dim height As Integer = windowRect.Bottom - windowRect.Top
 					Using borderPen As New Pen(theDarkBorder)
 						g.DrawRectangle(borderPen, 0, 0, width - 1, height - 1)
 					End Using
