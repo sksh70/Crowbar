@@ -683,6 +683,17 @@ Public NotInheritable Class ThemeManager
 			Exit Sub
 		End If
 
+		' Only the default glyph position (left, vertically centered) is handled; other positions keep the native glyph.
+		Dim checkAlign As ContentAlignment
+		If TypeOf sender Is CheckBox Then
+			checkAlign = CType(sender, CheckBox).CheckAlign
+		Else
+			checkAlign = CType(sender, RadioButton).CheckAlign
+		End If
+		If checkAlign <> ContentAlignment.MiddleLeft Then
+			Exit Sub
+		End If
+
 		Dim aButton As ButtonBase = CType(sender, ButtonBase)
 		Dim g As Graphics = e.Graphics
 		Dim glyphSize As Integer = CInt(13 * g.DpiX / 96)

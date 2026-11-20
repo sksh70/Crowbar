@@ -207,7 +207,15 @@ Public Class App
 		Dim appSettingsPathFileName As String = Path.Combine(Me.GetCustomDataPath(), App.theAppSettingsFileName)
 		Try
 			If Not File.Exists(appSettingsPathFileName) Then
-				File.WriteAllText(appSettingsPathFileName, My.Resources.Crowbar_Settings)
+				' A patch version (e.g. 0.74.1) has its own settings folder, so on first run start from the settings
+				'     of its release (e.g. 0.74) instead of defaults.
+				Dim releaseFolderName As String = My.Application.Info.ProductName + " " + My.Application.Info.Version.ToString(2)
+				Dim releaseAppSettingsPathFileName As String = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(appSettingsPathFileName)), releaseFolderName, App.theAppSettingsFileName)
+				If releaseAppSettingsPathFileName <> appSettingsPathFileName AndAlso File.Exists(releaseAppSettingsPathFileName) Then
+					File.Copy(releaseAppSettingsPathFileName, appSettingsPathFileName)
+				Else
+					File.WriteAllText(appSettingsPathFileName, My.Resources.Crowbar_Settings)
+				End If
 			End If
 		Catch ex As Exception
 			Console.WriteLine("EXCEPTION: " + ex.Message)

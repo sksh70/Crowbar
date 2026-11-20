@@ -21,6 +21,7 @@ Public Class TabControlEx
 			Me.theOriginalAllPaintingInWmPaint = Me.GetStyle(ControlStyles.AllPaintingInWmPaint)
 			Me.theOriginalOptimizedDoubleBuffer = Me.GetStyle(ControlStyles.OptimizedDoubleBuffer)
 			Me.SetStyle(ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint Or ControlStyles.OptimizedDoubleBuffer, True)
+			Me.UpdateNativeFont()
 		Else
 			Me.SetStyle(ControlStyles.UserPaint, Me.theOriginalUserPaint)
 			Me.SetStyle(ControlStyles.AllPaintingInWmPaint, Me.theOriginalAllPaintingInWmPaint)
@@ -80,8 +81,34 @@ Public Class TabControlEx
 		Me.UpdateScrollArrowsTheme()
 	End Sub
 
+	Protected Overrides Sub OnHandleCreated(ByVal e As EventArgs)
+		MyBase.OnHandleCreated(e)
+		If Me.theIsDark Then
+			Me.UpdateNativeFont()
+		End If
+	End Sub
+
+	Protected Overrides Sub OnFontChanged(ByVal e As EventArgs)
+		MyBase.OnFontChanged(e)
+		If Me.theIsDark Then
+			Me.UpdateNativeFont()
+		End If
+	End Sub
+
+	Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+		MyBase.Dispose(disposing)
+		If Me.theNativeFontHandle <> IntPtr.Zero Then
+			DeleteObject(Me.theNativeFontHandle)
+			Me.theNativeFontHandle = IntPtr.Zero
+		End If
+	End Sub
+
 	Protected Overrides Sub OnMouseMove(ByVal e As MouseEventArgs)
 		MyBase.OnMouseMove(e)
+		' Hot tracking is only drawn in dark mode.
+		If Not Me.theIsDark Then
+			Exit Sub
+		End If
 
 		Dim hotTabIndex As Integer = -1
 		For i As Integer = 0 To Me.TabCount - 1
@@ -105,6 +132,21 @@ Public Class TabControlEx
 				Me.Invalidate()
 			End If
 		End If
+	End Sub
+
+	' While UserPaint is on, WinForms no longer passes the font to the native tab control,
+	'     which would then size the tabs for its default font. Pass it here instead.
+	Private Sub UpdateNativeFont()
+		If Not Me.IsHandleCreated Then
+			Exit Sub
+		End If
+
+		Dim fontHandle As IntPtr = Me.Font.ToHfont()
+		SendMessage(Me.Handle, WM_SETFONT, fontHandle, New IntPtr(1))
+		If Me.theNativeFontHandle <> IntPtr.Zero Then
+			DeleteObject(Me.theNativeFontHandle)
+		End If
+		Me.theNativeFontHandle = fontHandle
 	End Sub
 
 	' The scroll arrows shown when the tabs do not fit are a separate native window.
@@ -131,6 +173,16 @@ Public Class TabControlEx
 		End If
 	End Sub
 
+	Private Const WM_SETFONT As Integer = &H30
+
+	<DllImport("user32.dll")>
+	Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal msg As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
+	End Function
+
+	<DllImport("gdi32.dll")>
+	Private Shared Function DeleteObject(ByVal hObject As IntPtr) As Boolean
+	End Function
+
 	<DllImport("user32.dll", CharSet:=CharSet.Unicode)>
 	Private Shared Function FindWindowEx(ByVal hwndParent As IntPtr, ByVal hwndChildAfter As IntPtr, ByVal lpszClass As String, ByVal lpszWindow As String) As IntPtr
 	End Function
@@ -142,6 +194,7 @@ Public Class TabControlEx
 	Private theIsDark As Boolean
 	Private theHotTabIndex As Integer
 	Private theThemedUpDownHandle As IntPtr
+	Private theNativeFontHandle As IntPtr
 	Private theOriginalUserPaint As Boolean
 	Private theOriginalAllPaintingInWmPaint As Boolean
 	Private theOriginalOptimizedDoubleBuffer As Boolean
