@@ -819,6 +819,31 @@ Public NotInheritable Class ThemeManager
 			Me.theBorderWidth = borderWidth
 		End Sub
 
+		' Lets Windows paint the non-client area (e.g. scroll bars) without the border strip, so its light border
+		'     never shows. Otherwise it flickers each time Windows redraws the border, e.g. while hovering a text box.
+		Protected Overrides Sub WndProc(ByRef m As Message)
+			If Not theIsDark OrElse m.Msg <> WM_NCPAINT OrElse Me.theBorderWidth = 0 Then
+				MyBase.WndProc(m)
+				Exit Sub
+			End If
+
+			Dim windowRect As RECT
+			GetWindowRect(Me.Handle, windowRect)
+			Dim insideRegion As IntPtr = CreateRectRgn(windowRect.Left + Me.theBorderWidth, windowRect.Top + Me.theBorderWidth, windowRect.Right - Me.theBorderWidth, windowRect.Bottom - Me.theBorderWidth)
+			Dim updateRegion As IntPtr = m.WParam
+			Try
+				' A wParam of 1 means the whole window; otherwise it is the region to update, in screen coordinates.
+				If updateRegion <> New IntPtr(1) Then
+					CombineRgn(insideRegion, insideRegion, updateRegion, RGN_AND)
+				End If
+				m.WParam = insideRegion
+				MyBase.WndProc(m)
+			Finally
+				m.WParam = updateRegion
+				DeleteObject(insideRegion)
+			End Try
+		End Sub
+
 		Protected Overrides Sub AfterMessage(ByVal msg As Integer)
 			If msg = WM_NCPAINT AndAlso Me.theBorderWidth > 0 Then
 				Me.PaintBorder()
@@ -1241,6 +1266,7 @@ Public NotInheritable Class ThemeManager
 	Private Const WM_PAINT As Integer = &HF
 	Private Const WM_NCPAINT As Integer = &H85
 	Private Const WM_SETFONT As Integer = &H30
+	Private Const RGN_AND As Integer = 1
 	Private Const WM_NOTIFY As Integer = &H4E
 	Private Const WM_CTLCOLORSTATIC As Integer = &H138
 	Private Const NM_CUSTOMDRAW As Integer = -12
@@ -1305,6 +1331,18 @@ Public NotInheritable Class ThemeManager
 
 	<DllImport("gdi32.dll")>
 	Private Shared Function DeleteObject(ByVal hObject As IntPtr) As Boolean
+	End Function
+
+	<DllImport("gdi32.dll")>
+	Private Shared Function CreateRectRgn(ByVal left As Integer, ByVal top As Integer, ByVal right As Integer, ByVal bottom As Integer) As IntPtr
+	End Function
+
+	<DllImport("gdi32.dll")>
+	Private Shared Function CombineRgn(ByVal hrgnDest As IntPtr, ByVal hrgnSrc1 As IntPtr, ByVal hrgnSrc2 As IntPtr, ByVal fnCombineMode As Integer) As Integer
+	End Function
+
+	<DllImport("user32.dll")>
+	Private Shared Function GetWindowRect(ByVal hWnd As IntPtr, ByRef lpRect As RECT) As Boolean
 	End Function
 
 	<DllImport("user32.dll")>
