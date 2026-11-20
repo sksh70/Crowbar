@@ -1,3 +1,13 @@
+# Crowbar (dark mode fork)
+Personal build of [Crowbar](https://github.com/ZeqMacaw/Crowbar) 0.74 by ZeqMacaw, with dark mode.
+
+<img width="800" alt="Crowbar in dark mode" src="https://github.com/user-attachments/assets/37bd0495-a5df-435a-8243-894d323cfaa0" />
+
+- Options → Theme: System / Light / Dark.
+- Download: [Releases](https://github.com/sksh70/Crowbar/releases). For the official Crowbar, use the website link below.
+
+---
+
 # Crowbar
  Crowbar - GoldSource and Source Engine Modding Tool
  
