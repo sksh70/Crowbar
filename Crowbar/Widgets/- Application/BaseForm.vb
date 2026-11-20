@@ -21,6 +21,13 @@
 	'	Next
 	'End Sub
 
+	Protected Overrides Sub OnLoad(e As EventArgs)
+		If Not Me.DesignMode Then
+			ThemeManager.Apply(Me)
+		End If
+		MyBase.OnLoad(e)
+	End Sub
+
 	'NOTE: Without this, when a user changes text in a textbox and then drags a file onto Crowbar, the text reverts back to the text before the change.
 	'      With this, the changed text is kept.
 	Protected Overrides Sub OnDeactivate(e As EventArgs)

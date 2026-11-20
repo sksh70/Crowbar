@@ -1,5 +1,12 @@
 ﻿Public Class AgreementRequiresAcceptanceForm
 
+	Protected Overrides Sub OnLoad(e As EventArgs)
+		If Not Me.DesignMode Then
+			ThemeManager.Apply(Me)
+		End If
+		MyBase.OnLoad(e)
+	End Sub
+
 	Private Sub OpenSteamSubscriberAgreementButton_Click(sender As Object, e As EventArgs) Handles OpenSteamSubscriberAgreementButton.Click
 		Me.DialogResult = DialogResult.OK
 		Me.Close()

@@ -572,6 +572,10 @@
     <Compile Include="Widgets\- General\GroupBoxEx.vb">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Widgets\- General\TabControlEx.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Widgets\- General\ThemeManager.vb" />
     <Compile Include="Widgets\- General\TreeViewEx.vb">
       <SubType>Component</SubType>
     </Compile>

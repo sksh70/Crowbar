@@ -15,13 +15,13 @@
 				Me.theControlIsReadOnly = value
 
 				If Me.theControlIsReadOnly Then
-					Me.ForeColor = SystemColors.ControlText
-					Me.BackColor = SystemColors.Control
+					Me.ForeColor = ThemeManager.Map(SystemColors.ControlText)
+					Me.BackColor = ThemeManager.Map(SystemColors.Control)
 					' [CheckBoxEx] Maybe: Somehow change backcolor of the box.
 					' [CheckBoxEx] Maybe: Somehow disable checkmarking of the box.
 				Else
-					Me.ForeColor = SystemColors.ControlText
-					Me.BackColor = SystemColors.Window
+					Me.ForeColor = ThemeManager.Map(SystemColors.ControlText)
+					Me.BackColor = ThemeManager.Map(SystemColors.Window)
 				End If
 			End If
 		End Set

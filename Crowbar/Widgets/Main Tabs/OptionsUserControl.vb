@@ -13,6 +13,7 @@ Public Class OptionsUserControl
 
 	Protected Overrides Sub Init()
 		Me.SingleInstanceCheckBox.DataBindings.Add("Checked", TheApp.Settings, "AppIsSingleInstance", False, DataSourceUpdateMode.OnPropertyChanged)
+		Me.InitThemeComboBox()
 
 		' Auto-Open
 
@@ -58,6 +59,14 @@ Public Class OptionsUserControl
 		Me.UpdateApplyPanel()
 
 		AddHandler TheApp.Settings.PropertyChanged, AddressOf AppSettings_PropertyChanged
+	End Sub
+
+	' Changing the setting applies the theme right away; see ThemeManager.
+	Private Sub InitThemeComboBox()
+		Me.ThemeComboBox.DisplayMember = "Value"
+		Me.ThemeComboBox.ValueMember = "Key"
+		Me.ThemeComboBox.DataSource = EnumHelper.ToList(GetType(AppThemeOptions))
+		Me.ThemeComboBox.DataBindings.Add("SelectedValue", TheApp.Settings, "AppTheme", False, DataSourceUpdateMode.OnPropertyChanged)
 	End Sub
 
 	Private Sub InitAutoOpenRadioButtons()

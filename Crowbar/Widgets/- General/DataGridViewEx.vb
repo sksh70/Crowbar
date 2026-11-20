@@ -48,9 +48,9 @@ Public Class DataGridViewEx
 				MyBase.ReadOnly = value
 
 				If MyBase.ReadOnly Then
-					Me.DefaultCellStyle.BackColor = SystemColors.Control
+					Me.DefaultCellStyle.BackColor = ThemeManager.Map(SystemColors.Control)
 				Else
-					Me.DefaultCellStyle.BackColor = SystemColors.Window
+					Me.DefaultCellStyle.BackColor = ThemeManager.Map(SystemColors.Window)
 				End If
 			End If
 		End Set

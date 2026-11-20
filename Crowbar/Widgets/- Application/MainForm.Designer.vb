@@ -27,7 +27,7 @@ Partial Class MainForm
 		Me.AboutCrowbarToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 		Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
 		Me.AboutCrowbarToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-		Me.MainTabControl = New System.Windows.Forms.TabControl()
+		Me.MainTabControl = New Crowbar.TabControlEx()
 		Me.SetUpGamesTabPage = New System.Windows.Forms.TabPage()
 		Me.SetUpGamesUserControl1 = New Crowbar.SetUpGamesUserControl()
 		Me.DownloadTabPage = New System.Windows.Forms.TabPage()
@@ -392,7 +392,7 @@ Partial Class MainForm
 		Me.ResumeLayout(False)
 
 	End Sub
-	Friend WithEvents MainTabControl As System.Windows.Forms.TabControl
+	Friend WithEvents MainTabControl As Crowbar.TabControlEx
 	Friend WithEvents MainToolTip As System.Windows.Forms.ToolTip
 	Friend WithEvents SetUpGamesTabPage As System.Windows.Forms.TabPage
 	Friend WithEvents SetUpGamesUserControl1 As Crowbar.SetUpGamesUserControl

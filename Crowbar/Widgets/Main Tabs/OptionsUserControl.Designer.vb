@@ -95,6 +95,8 @@ Partial Class OptionsUserControl
 		Me.ApplyButton = New System.Windows.Forms.Button()
 		Me.ApplyPanel = New System.Windows.Forms.Panel()
 		Me.SingleInstanceCheckBox = New System.Windows.Forms.CheckBox()
+		Me.ThemeLabel = New System.Windows.Forms.Label()
+		Me.ThemeComboBox = New System.Windows.Forms.ComboBox()
 		Me.GroupBox1.SuspendLayout()
 		Me.Panel7.SuspendLayout()
 		Me.GroupBox2.SuspendLayout()
@@ -939,10 +941,30 @@ Partial Class OptionsUserControl
 		Me.SingleInstanceCheckBox.Text = "Restrict to single instance (only one Crowbar open at a time)"
 		Me.SingleInstanceCheckBox.UseVisualStyleBackColor = True
 		'
+		'ThemeLabel
+		'
+		Me.ThemeLabel.AutoSize = True
+		Me.ThemeLabel.Location = New System.Drawing.Point(415, 4)
+		Me.ThemeLabel.Name = "ThemeLabel"
+		Me.ThemeLabel.Size = New System.Drawing.Size(43, 13)
+		Me.ThemeLabel.TabIndex = 5
+		Me.ThemeLabel.Text = "Theme:"
+		'
+		'ThemeComboBox
+		'
+		Me.ThemeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+		Me.ThemeComboBox.FormattingEnabled = True
+		Me.ThemeComboBox.Location = New System.Drawing.Point(464, 0)
+		Me.ThemeComboBox.Name = "ThemeComboBox"
+		Me.ThemeComboBox.Size = New System.Drawing.Size(100, 21)
+		Me.ThemeComboBox.TabIndex = 6
+		'
 		'OptionsUserControl
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+		Me.Controls.Add(Me.ThemeComboBox)
+		Me.Controls.Add(Me.ThemeLabel)
 		Me.Controls.Add(Me.SingleInstanceCheckBox)
 		Me.Controls.Add(Me.ApplyPanel)
 		Me.Controls.Add(Me.GroupBox3)
@@ -1037,6 +1059,8 @@ Partial Class OptionsUserControl
 	Friend WithEvents AutoOpenFolderForDecompileRadioButton As System.Windows.Forms.RadioButton
 	Friend WithEvents AutoOpenFolderForUnpackRadioButton As System.Windows.Forms.RadioButton
 	Friend WithEvents SingleInstanceCheckBox As System.Windows.Forms.CheckBox
+	Friend WithEvents ThemeLabel As System.Windows.Forms.Label
+	Friend WithEvents ThemeComboBox As System.Windows.Forms.ComboBox
 	Friend WithEvents Label14 As System.Windows.Forms.Label
 	Friend WithEvents AutoOpenFpxFileCheckBox As System.Windows.Forms.CheckBox
 	Friend WithEvents AutoOpenGmaFileCheckBox As System.Windows.Forms.CheckBox

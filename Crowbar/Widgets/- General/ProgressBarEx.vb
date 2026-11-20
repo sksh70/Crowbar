@@ -50,7 +50,9 @@ Public Class ProgressBarEx
 		Dim percent As Double = CDbl(Value - Minimum) / CDbl(range)
 		Dim rect As Rectangle = Me.ClientRectangle
 		Dim bounds As Rectangle = e.ClipRectangle
-		If rect.Width > 0 AndAlso percent > 0 Then
+		If ThemeManager.IsDark Then
+			ThemeManager.DrawProgressBar(g, rect, percent)
+		ElseIf rect.Width > 0 AndAlso percent > 0 Then
 			If ProgressBarRenderer.IsSupported Then
 				ProgressBarRenderer.DrawHorizontalBar(g, Me.DisplayRectangle)
 				rect.Inflate(-2, -2)

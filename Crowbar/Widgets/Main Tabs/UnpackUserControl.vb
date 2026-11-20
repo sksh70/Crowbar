@@ -323,7 +323,7 @@ Public Class UnpackUserControl
 
 	'NOTE: This is only needed because TreeView BackColor does not automatically change when Windows Theme is switched.
 	Private Sub PackageTreeView_SystemColorsChanged(sender As Object, e As EventArgs) Handles PackageTreeView.SystemColorsChanged
-		Me.PackageTreeView.BackColor = SystemColors.Control
+		Me.PackageTreeView.BackColor = ThemeManager.Map(SystemColors.Control)
 	End Sub
 
 	Private Sub CustomMenu_Opening(ByVal sender As System.Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles PackageTreeViewCustomMenu.Opening
@@ -429,7 +429,7 @@ Public Class UnpackUserControl
 			e.Item.ImageIndex = Me.ImageList1.Images.IndexOfKey(entry.Extension)
 
 			If Not entry.PackageDataPathFileNameExists Then
-				e.Item.ForeColor = SystemColors.GrayText
+				e.Item.ForeColor = ThemeManager.GrayText
 				'e.item.BackColor = SystemColors
 			End If
 		Else
