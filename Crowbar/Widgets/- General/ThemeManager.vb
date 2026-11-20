@@ -969,6 +969,9 @@ Public NotInheritable Class ThemeManager
 		Protected Overrides Sub AfterMessage(ByVal msg As Integer)
 			If msg = WM_PAINT Then
 				Me.PaintFace()
+			ElseIf msg = WM_SIZE Then
+				' Windows redraws the resized combo box without WM_PAINT, so ask for one to paint the face again.
+				Me.theComboBox.Invalidate(True)
 			End If
 		End Sub
 
@@ -1263,6 +1266,7 @@ Public NotInheritable Class ThemeManager
 		Public hwndList As IntPtr
 	End Structure
 
+	Private Const WM_SIZE As Integer = &H5
 	Private Const WM_PAINT As Integer = &HF
 	Private Const WM_NCPAINT As Integer = &H85
 	Private Const WM_SETFONT As Integer = &H30
