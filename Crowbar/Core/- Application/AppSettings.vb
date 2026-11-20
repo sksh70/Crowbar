@@ -1697,7 +1697,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultUnpackOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.UnpackOutputSubfolderName = "unpacked " + My.Application.Info.Version.ToString(2)
+		Me.UnpackOutputSubfolderName = "unpacked " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultUnpackOptions()
@@ -1709,7 +1709,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultDecompileOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.DecompileOutputSubfolderName = "decompiled " + My.Application.Info.Version.ToString(2)
+		Me.DecompileOutputSubfolderName = "decompiled " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultDecompileReCreateFilesOptions()
@@ -1737,7 +1737,7 @@ Public Class AppSettings
 
 	Public Sub SetDefaultCompileOutputSubfolderName()
 		'NOTE: Call the properties so the NotifyPropertyChanged events are raised.
-		Me.CompileOutputSubfolderName = "compiled " + My.Application.Info.Version.ToString(2)
+		Me.CompileOutputSubfolderName = "compiled " + App.VersionText
 	End Sub
 
 	Public Sub SetDefaultCompileOptions()

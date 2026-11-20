@@ -15,7 +15,7 @@ Public Class AppExceptionHandler
 			errorReportText += "   "
 			errorReportText += My.Application.Info.ProductName
 			errorReportText += " "
-			errorReportText += My.Application.Info.Version.ToString(2)
+			errorReportText += App.VersionText
 			errorReportText += vbCrLf
 			errorReportText += vbCrLf
 

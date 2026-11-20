@@ -87,6 +87,19 @@ Public Class App
 
 #Region "Properties"
 
+	' Version shown to the user and used in folder names: "0.74" for 0.74.0.0, "0.74.1" for 0.74.1.0.
+	Public Shared ReadOnly Property VersionText() As String
+		Get
+			Dim aVersion As Version = My.Application.Info.Version
+			If aVersion.Revision > 0 Then
+				Return aVersion.ToString(4)
+			ElseIf aVersion.Build > 0 Then
+				Return aVersion.ToString(3)
+			End If
+			Return aVersion.ToString(2)
+		End Get
+	End Property
+
 	Public ReadOnly Property Settings() As AppSettings
 		Get
 			Return Me.theSettings
@@ -285,7 +298,7 @@ Public Class App
 		'customDataPath += "Crowbar"
 		customDataPath += My.Application.Info.ProductName
 		customDataPath += " "
-		customDataPath += My.Application.Info.Version.ToString(2)
+		customDataPath += App.VersionText
 
 		FileManager.CreatePath(customDataPath)
 		'End If
@@ -414,7 +427,7 @@ Public Class App
 
 		result = My.Application.Info.ProductName
 		result += " "
-		result += My.Application.Info.Version.ToString(2)
+		result += App.VersionText
 
 		Return result
 	End Function
