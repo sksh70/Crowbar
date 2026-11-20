@@ -1,5 +1,3 @@
-Imports System.Runtime.InteropServices
-
 ' Purpose: TabControl that draws its tab headers itself in dark mode, because Windows always draws them light.
 Public Class TabControlEx
 	Inherits TabControl
@@ -21,13 +19,13 @@ Public Class TabControlEx
 			Me.theOriginalAllPaintingInWmPaint = Me.GetStyle(ControlStyles.AllPaintingInWmPaint)
 			Me.theOriginalOptimizedDoubleBuffer = Me.GetStyle(ControlStyles.OptimizedDoubleBuffer)
 			Me.SetStyle(ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint Or ControlStyles.OptimizedDoubleBuffer, True)
-			Me.UpdateNativeFont()
+			ThemeManager.SetNativeFont(Me, Me.theNativeFontHandle)
 		Else
 			Me.SetStyle(ControlStyles.UserPaint, Me.theOriginalUserPaint)
 			Me.SetStyle(ControlStyles.AllPaintingInWmPaint, Me.theOriginalAllPaintingInWmPaint)
 			Me.SetStyle(ControlStyles.OptimizedDoubleBuffer, Me.theOriginalOptimizedDoubleBuffer)
 		End If
-		Me.UpdateScrollArrowsTheme()
+		ThemeManager.ApplyTabScrollArrowsTheme(Me, Me.theThemedUpDownHandle)
 		Me.Invalidate()
 	End Sub
 
@@ -78,29 +76,28 @@ Public Class TabControlEx
 			Next
 		End Using
 
-		Me.UpdateScrollArrowsTheme()
+		ThemeManager.ApplyTabScrollArrowsTheme(Me, Me.theThemedUpDownHandle)
 	End Sub
 
+	' While UserPaint is on, WinForms no longer passes the font to the native tab control,
+	'     which would then size the tabs for its default font, so pass it here instead.
 	Protected Overrides Sub OnHandleCreated(ByVal e As EventArgs)
 		MyBase.OnHandleCreated(e)
 		If Me.theIsDark Then
-			Me.UpdateNativeFont()
+			ThemeManager.SetNativeFont(Me, Me.theNativeFontHandle)
 		End If
 	End Sub
 
 	Protected Overrides Sub OnFontChanged(ByVal e As EventArgs)
 		MyBase.OnFontChanged(e)
 		If Me.theIsDark Then
-			Me.UpdateNativeFont()
+			ThemeManager.SetNativeFont(Me, Me.theNativeFontHandle)
 		End If
 	End Sub
 
 	Protected Overrides Sub Dispose(ByVal disposing As Boolean)
 		MyBase.Dispose(disposing)
-		If Me.theNativeFontHandle <> IntPtr.Zero Then
-			DeleteObject(Me.theNativeFontHandle)
-			Me.theNativeFontHandle = IntPtr.Zero
-		End If
+		ThemeManager.DeleteNativeFont(Me.theNativeFontHandle)
 	End Sub
 
 	Protected Overrides Sub OnMouseMove(ByVal e As MouseEventArgs)
@@ -133,63 +130,6 @@ Public Class TabControlEx
 			End If
 		End If
 	End Sub
-
-	' While UserPaint is on, WinForms no longer passes the font to the native tab control,
-	'     which would then size the tabs for its default font. Pass it here instead.
-	Private Sub UpdateNativeFont()
-		If Not Me.IsHandleCreated Then
-			Exit Sub
-		End If
-
-		Dim fontHandle As IntPtr = Me.Font.ToHfont()
-		SendMessage(Me.Handle, WM_SETFONT, fontHandle, New IntPtr(1))
-		If Me.theNativeFontHandle <> IntPtr.Zero Then
-			DeleteObject(Me.theNativeFontHandle)
-		End If
-		Me.theNativeFontHandle = fontHandle
-	End Sub
-
-	' The scroll arrows shown when the tabs do not fit are a separate native window.
-	Private Sub UpdateScrollArrowsTheme()
-		If Not Me.IsHandleCreated Then
-			Exit Sub
-		End If
-
-		Dim upDownHandle As IntPtr = FindWindowEx(Me.Handle, IntPtr.Zero, "msctls_updown32", Nothing)
-		If upDownHandle <> Me.theThemedUpDownHandle Then
-			Me.theThemedUpDownHandle = IntPtr.Zero
-		End If
-		If upDownHandle <> IntPtr.Zero AndAlso (Me.theIsDark <> (Me.theThemedUpDownHandle <> IntPtr.Zero)) Then
-			Try
-				If Me.theIsDark Then
-					SetWindowTheme(upDownHandle, "DarkMode_Explorer", Nothing)
-					Me.theThemedUpDownHandle = upDownHandle
-				Else
-					SetWindowTheme(upDownHandle, Nothing, Nothing)
-					Me.theThemedUpDownHandle = IntPtr.Zero
-				End If
-			Catch ex As Exception
-			End Try
-		End If
-	End Sub
-
-	Private Const WM_SETFONT As Integer = &H30
-
-	<DllImport("user32.dll")>
-	Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal msg As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
-	End Function
-
-	<DllImport("gdi32.dll")>
-	Private Shared Function DeleteObject(ByVal hObject As IntPtr) As Boolean
-	End Function
-
-	<DllImport("user32.dll", CharSet:=CharSet.Unicode)>
-	Private Shared Function FindWindowEx(ByVal hwndParent As IntPtr, ByVal hwndChildAfter As IntPtr, ByVal lpszClass As String, ByVal lpszWindow As String) As IntPtr
-	End Function
-
-	<DllImport("uxtheme.dll", CharSet:=CharSet.Unicode)>
-	Private Shared Function SetWindowTheme(ByVal hWnd As IntPtr, ByVal pszSubAppName As String, ByVal pszSubIdList As String) As Integer
-	End Function
 
 	Private theIsDark As Boolean
 	Private theHotTabIndex As Integer

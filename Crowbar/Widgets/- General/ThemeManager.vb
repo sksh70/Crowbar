@@ -101,6 +101,68 @@ Public NotInheritable Class ThemeManager
 		ThemeManager.ApplyToControl(root)
 	End Sub
 
+	' Call from a form's OnLoad, before MyBase.OnLoad.
+	Public Shared Sub ApplyToForm(ByVal aForm As Form)
+		If aForm.Site IsNot Nothing AndAlso aForm.Site.DesignMode Then
+			Exit Sub
+		End If
+		ThemeManager.Apply(aForm)
+	End Sub
+
+	' Sets a color that code chooses at run time, given as the color it would use in light mode.
+	' In dark mode the mapped color is set, and the light color is what returns when switching back to light.
+	Public Shared Sub SetColor(ByVal owner As Control, ByVal lightColor As Color, ByVal setColor As Action(Of Color))
+		Dim state As ThemedState = Nothing
+		If theIsDark AndAlso theThemedStates.TryGetValue(owner, state) Then
+			setColor(ThemeManager.Map(lightColor))
+			' Inserted first so it runs last, after restoring the colors remembered when the widget was darkened.
+			state.RestoreActions.Insert(0, Sub() setColor(lightColor))
+		Else
+			' A widget that is not darkened yet gets the light color and is mapped when it is darkened.
+			setColor(lightColor)
+		End If
+	End Sub
+
+	' The scroll arrows shown when a TabControl's tabs do not fit are a separate native window, created when needed.
+	' themedUpDownHandle remembers the arrows window that was themed dark, so it is themed only once.
+	Friend Shared Sub ApplyTabScrollArrowsTheme(ByVal aTabControl As TabControl, ByRef themedUpDownHandle As IntPtr)
+		If Not aTabControl.IsHandleCreated Then
+			Exit Sub
+		End If
+
+		Try
+			Dim upDownHandle As IntPtr = FindWindowEx(aTabControl.Handle, IntPtr.Zero, "msctls_updown32", Nothing)
+			If upDownHandle <> themedUpDownHandle Then
+				themedUpDownHandle = IntPtr.Zero
+			End If
+			If upDownHandle <> IntPtr.Zero AndAlso (theIsDark <> (themedUpDownHandle <> IntPtr.Zero)) Then
+				ThemeManager.SetNativeTheme(upDownHandle, "DarkMode_Explorer")
+				themedUpDownHandle = If(theIsDark, upDownHandle, IntPtr.Zero)
+			End If
+		Catch ex As Exception
+		End Try
+	End Sub
+
+	' Gives a widget's native window the widget's font, for widgets that paint themselves (WinForms then skips this).
+	' fontHandle is the font handle passed last time; it is replaced and the old one deleted.
+	Friend Shared Sub SetNativeFont(ByVal aControl As Control, ByRef fontHandle As IntPtr)
+		If Not aControl.IsHandleCreated Then
+			Exit Sub
+		End If
+
+		Dim newFontHandle As IntPtr = aControl.Font.ToHfont()
+		SendMessage(aControl.Handle, WM_SETFONT, newFontHandle, New IntPtr(1))
+		ThemeManager.DeleteNativeFont(fontHandle)
+		fontHandle = newFontHandle
+	End Sub
+
+	Friend Shared Sub DeleteNativeFont(ByRef fontHandle As IntPtr)
+		If fontHandle <> IntPtr.Zero Then
+			DeleteObject(fontHandle)
+			fontHandle = IntPtr.Zero
+		End If
+	End Sub
+
 	' Re-reads the theme setting and, if it changed, applies it to all open forms.
 	Public Shared Sub ApplyAll()
 		ThemeManager.EnsureInitialized()
@@ -552,7 +614,7 @@ Public NotInheritable Class ThemeManager
 				If headerHandle <> IntPtr.Zero Then
 					ThemeManager.SetNativeTheme(headerHandle, "DarkMode_ItemsView")
 				End If
-				ThemeManager.UpdatePainter(aControl, New ListViewPainter())
+				ThemeManager.UpdatePainter(aControl, New ListViewPainter(headerHandle))
 			ElseIf TypeOf aControl Is TextBox AndAlso Not CType(aControl, TextBox).Multiline Then
 				ThemeManager.SetNativeTheme(aControl.Handle, "DarkMode_CFD")
 			ElseIf TypeOf aControl Is TextBoxBase OrElse TypeOf aControl Is TreeView OrElse TypeOf aControl Is ListBox OrElse TypeOf aControl Is ScrollBar OrElse TypeOf aControl Is DataGridView OrElse (TypeOf aControl Is ScrollableControl AndAlso CType(aControl, ScrollableControl).AutoScroll) Then
@@ -774,13 +836,27 @@ Public NotInheritable Class ThemeManager
 				End If
 			End If
 
+			' Draw from the first visible line so the text matches the scroll position.
+			' Formatting is not kept; Windows also draws disabled text in one gray color.
+			Dim aRichText As RichTextBox = CType(Me.theControl, RichTextBox)
+			Dim firstVisibleCharIndex As Integer = aRichText.GetCharIndexFromPosition(New Point(1, 1))
+			Dim firstVisibleLineIndex As Integer = aRichText.GetFirstCharIndexFromLine(aRichText.GetLineFromCharIndex(firstVisibleCharIndex))
+			Dim visibleText As String = aRichText.Text
+			If firstVisibleLineIndex > 0 AndAlso firstVisibleLineIndex < visibleText.Length Then
+				visibleText = visibleText.Substring(firstVisibleLineIndex)
+			End If
+			Dim flags As TextFormatFlags = TextFormatFlags.Left Or TextFormatFlags.Top Or TextFormatFlags.NoPrefix Or TextFormatFlags.TextBoxControl
+			If aRichText.WordWrap Then
+				flags = flags Or TextFormatFlags.WordBreak
+			End If
+
 			Using g As Graphics = Graphics.FromHwnd(Me.Handle)
-				Dim bounds As Rectangle = Me.theControl.ClientRectangle
-				Using backBrush As New SolidBrush(Me.theControl.BackColor)
+				Dim bounds As Rectangle = aRichText.ClientRectangle
+				Using backBrush As New SolidBrush(aRichText.BackColor)
 					g.FillRectangle(backBrush, bounds)
 				End Using
 				bounds.Inflate(-1, -1)
-				TextRenderer.DrawText(g, Me.theControl.Text, Me.theControl.Font, bounds, theDarkGrayText, TextFormatFlags.Left Or TextFormatFlags.Top Or TextFormatFlags.WordBreak Or TextFormatFlags.NoPrefix Or TextFormatFlags.TextBoxControl)
+				TextRenderer.DrawText(g, visibleText, aRichText.Font, bounds, theDarkGrayText, flags)
 			End Using
 		End Sub
 
@@ -816,10 +892,15 @@ Public NotInheritable Class ThemeManager
 	Private Class ListViewPainter
 		Inherits OverPainter
 
+		Public Sub New(ByVal headerHandle As IntPtr)
+			Me.theHeaderHandle = headerHandle
+		End Sub
+
 		Protected Overrides Function HandleMessage(ByRef m As Message) As Boolean
-			If m.Msg = WM_NOTIFY Then
+			' NMHDR starts with hwndFrom, so check the sender before reading the rest.
+			If m.Msg = WM_NOTIFY AndAlso Me.theHeaderHandle <> IntPtr.Zero AndAlso Marshal.ReadIntPtr(m.LParam) = Me.theHeaderHandle Then
 				Dim header As NMHDR = CType(Marshal.PtrToStructure(m.LParam, GetType(NMHDR)), NMHDR)
-				If header.code = NM_CUSTOMDRAW AndAlso header.hwndFrom = SendMessage(Me.Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero) Then
+				If header.code = NM_CUSTOMDRAW Then
 					Dim customDraw As NMCUSTOMDRAW = CType(Marshal.PtrToStructure(m.LParam, GetType(NMCUSTOMDRAW)), NMCUSTOMDRAW)
 					If customDraw.dwDrawStage = CDDS_PREPAINT Then
 						m.Result = New IntPtr(CDRF_NOTIFYITEMDRAW)
@@ -833,6 +914,8 @@ Public NotInheritable Class ThemeManager
 			End If
 			Return False
 		End Function
+
+		Private ReadOnly theHeaderHandle As IntPtr
 
 	End Class
 
@@ -1157,6 +1240,7 @@ Public NotInheritable Class ThemeManager
 
 	Private Const WM_PAINT As Integer = &HF
 	Private Const WM_NCPAINT As Integer = &H85
+	Private Const WM_SETFONT As Integer = &H30
 	Private Const WM_NOTIFY As Integer = &H4E
 	Private Const WM_CTLCOLORSTATIC As Integer = &H138
 	Private Const NM_CUSTOMDRAW As Integer = -12
@@ -1213,6 +1297,14 @@ Public NotInheritable Class ThemeManager
 
 	<DllImport("user32.dll")>
 	Private Shared Function ReleaseDC(ByVal hWnd As IntPtr, ByVal hDC As IntPtr) As Integer
+	End Function
+
+	<DllImport("user32.dll", CharSet:=CharSet.Unicode)>
+	Private Shared Function FindWindowEx(ByVal hwndParent As IntPtr, ByVal hwndChildAfter As IntPtr, ByVal lpszClass As String, ByVal lpszWindow As String) As IntPtr
+	End Function
+
+	<DllImport("gdi32.dll")>
+	Private Shared Function DeleteObject(ByVal hObject As IntPtr) As Boolean
 	End Function
 
 	<DllImport("user32.dll")>

@@ -1,9 +1,7 @@
 ﻿Public Class DeleteItemForm
 
 	Protected Overrides Sub OnLoad(e As EventArgs)
-		If Not Me.DesignMode Then
-			ThemeManager.Apply(Me)
-		End If
+		ThemeManager.ApplyToForm(Me)
 		MyBase.OnLoad(e)
 	End Sub
 
